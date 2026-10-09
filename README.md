@@ -75,8 +75,8 @@ The table shows which steps need the internet and which need the real key.
 1. Clone the repository.
 
    ```bash
-   git clone https://github.com/jasonrwise/trialbridge_mcp.git
-   cd trialbridge_mcp
+   git clone https://github.com/jasonrwise/trial-cohort-builder.git
+   cd trial-cohort-builder
    ```
 
 2. Copy the env example, then put a real key in `ANTHROPIC_API_KEY`.
@@ -543,11 +543,11 @@ you have set them up, your FHIR and Slack credentials:
 {
   "mcpServers": {
     "trialbridge-mcp": {
-      "command": "/absolute/path/to/trialbridge_mcp/.venv/bin/python",
+      "command": "/absolute/path/to/trial-cohort-builder/.venv/bin/python",
       "args": ["-m", "src.server"],
       "env": {
-        "TRIALBRIDGE_KEYS_FILE": "/absolute/path/to/trialbridge_mcp/keys.json",
-        "TRIALBRIDGE_AUDIT_LOG_PATH": "/absolute/path/to/trialbridge_mcp/logs/audit.log",
+        "TRIALBRIDGE_KEYS_FILE": "/absolute/path/to/trial-cohort-builder/keys.json",
+        "TRIALBRIDGE_AUDIT_LOG_PATH": "/absolute/path/to/trial-cohort-builder/logs/audit.log",
         "TRIALBRIDGE_API_KEY": "tb_demo_fake_crc_0000000000000000",
         "FHIR_BASE_URL": "https://your-fhir-host.example.com",
         "FHIR_TOKEN_URL": "https://your-fhir-host.example.com/oauth2/token",
@@ -593,11 +593,11 @@ web process checks those four. If one is unset or unwritable, it refuses to star
 variable on stderr. See the [environment variables table](#environment-variables).
 
 ```bash
-export TRIALBRIDGE_KEYS_FILE=/absolute/path/to/trialbridge_mcp/keys.json
-export TRIALBRIDGE_AUDIT_LOG_PATH=/absolute/path/to/trialbridge_mcp/logs/audit.log
+export TRIALBRIDGE_KEYS_FILE=/absolute/path/to/trial-cohort-builder/keys.json
+export TRIALBRIDGE_AUDIT_LOG_PATH=/absolute/path/to/trial-cohort-builder/logs/audit.log
 export TRIALBRIDGE_API_KEY=tb_demo_fake_crc_0000000000000000
 export TRIALBRIDGE_SESSION_SECRET=tb_demo_fake_session_secret_0000
-export TRIALBRIDGE_SCORECARD_STORE_PATH=/absolute/path/to/trialbridge_mcp/logs/scorecards.jsonl
+export TRIALBRIDGE_SCORECARD_STORE_PATH=/absolute/path/to/trial-cohort-builder/logs/scorecards.jsonl
 export ANTHROPIC_API_KEY=tb_demo_fake_anthropic_key
 export ANTHROPIC_MODEL=claude-opus-5
 ```
