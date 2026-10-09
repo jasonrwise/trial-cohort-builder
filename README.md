@@ -427,34 +427,6 @@ app.
   `data_revision`, so the whole scorecard store becomes unreadable. That build also predates
   `make reset`. The reset deletes the saved scorecards. Then switch back.
 
-### Pinned versions
-
-Every image is pinned to an exact tag. `postgres:16-alpine` is a rolling minor tag, so it is
-also pinned by digest. `tests/unit/test_stack_guards.py` refuses `latest`, untagged and
-`-tomcat` images. It also fails if a pin in the table below disagrees with the committed
-`docker-compose.yml` or `Dockerfile`.
-
-| Image | Digest at pin time | Used by |
-|---|---|---|
-| `postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea` | in the image reference | `db` |
-| `hapiproject/hapi:v8.12.0-1` | `sha256:d7f38d3676900b07e8a7d3500426eaf8d90ea9ced9a6726416f080f68e230fb0` | `fhir` |
-| `python:3.12.14-slim-trixie` | `sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f` | the web image (`web`, `token`, `seed`) |
-
-Upgrade procedure:
-
-1. Change the tag in `docker-compose.yml` or `Dockerfile` and in the table above in the same
-   commit. The guard fails otherwise. A Postgres upgrade changes the digest in both places.
-2. Run `make down`, then `make up`, and confirm all four services report healthy.
-3. Run the start-and-seed smoke test: `make load NCT=NCT99999999`, then screen that trial in
-   the web app.
-4. On a HAPI bump, re-check the Postgres wiring names (`SPRING_DATASOURCE_*`,
-   `HIBERNATE_DIALECT`) and the `HapiFhirPostgresDialect` class against the new starter. A tag
-   change may rename them. Never switch to a `-tomcat` variant.
-5. A Postgres major-version bump cannot reuse the old data volume.
-
-Only direct dependencies are pinned in `pyproject.toml`, so transitive Python packages resolve
-at image build time. This drift is an accepted limitation.
-
 ## FHIR store setup
 
 `query_patient_cohort` needs a FHIR R4 server. For local demos, the repo ships one. Follow the
@@ -467,11 +439,6 @@ Use synthetic data only. Never load real patient data. Generate a cohort with
 [Seed the demo store](#seed-the-demo-store). The gateway's Safe Harbor stripping
 (`src/services/deidentify.py`) is a second, mandatory line of defense. It does not replace
 starting from synthetic records.
-
-To refresh the recorded test fixtures against your own live instance, run
-`python scripts/capture_fixtures.py fhir --condition-code <ICD-10-CM> --loinc <LOINC>`. This
-step is optional. The automated test suite always runs against the recorded fixtures, never
-live FHIR.
 
 Without a reachable FHIR server, `query_patient_cohort` returns the `DEGRADED` envelope once
 the circuit breaker trips, after 3 consecutive failures. It does not hang or crash.
@@ -512,9 +479,6 @@ write in `.env` does not reach them. To point a container at another server, edi
 `FHIR_BASE_URL` on the `web` service and on the `seed` service in `docker-compose.yml`. For a
 protected server, also edit `FHIR_TOKEN_URL` on both services and set the client ID and secret
 in `.env`.
-
-The offline test `tests/integration/test_fhir_server_agnostic.py` runs the same screening
-against two base URLs. It checks that only `FHIR_BASE_URL` changes between the runs.
 
 ## Slack setup
 
@@ -718,52 +682,6 @@ both use it.
 - **Symbols.** Clinical symbols (β, ≥, →, dashes, curly quotes) print as stored. The PDF uses
   the vendored DejaVu Sans 2.37. Its license is in `src/services/fonts/LICENSE`.
 
-### UI conformance check
-
-The conformance check renders every mapped mockup state and its built page in headless
-Chromium. It compares layout (region order, alignment and spacing), not text. It is opt-in.
-The default test run never launches a browser.
-
-Prerequisites:
-
-- The dev extra, which installs Playwright: `uv pip install -e ".[dev]"`.
-- The browser build: `.venv/bin/python -m playwright install chromium`.
-- On Ubuntu 23.10 and later, Chromium's sandbox also needs
-  `sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0`. The setting lasts until
-  reboot.
-
-Run it with:
-
-```bash
-.venv/bin/python -m pytest -m ui_conformance
-```
-
-The check needs no keys, cookies or `.env` values. It writes fixture keys to a temp file and
-signs in through the real login form. A failing state writes side-by-side images to
-`tests/ui_conformance/reports/`. Git ignores that directory.
-
-## Access control and role resolution
-
-**How the caller's role is resolved.** The gateway looks up `TRIALBRIDGE_API_KEY` in the
-key→role file named by `TRIALBRIDGE_KEYS_FILE`. It re-reads that file from disk on every tool
-call. No code under `src/services/` caches it, and `tests/unit/test_no_caching_layer.py`
-enforces this statically. An edit to the key file takes effect on that key's next call, with
-no restart.
-
-The caller's role never comes from the client or the request. No tool input schema has a role
-field, and no MCP tool signature accepts one.
-
-A key that resolves to `SITE_ADMIN`, or a key that is absent from the file, is denied on every
-tool (JSON-RPC error code `-32003`). A denial is a response, not a shutdown. The gateway keeps
-running. `SITE_ADMIN` has no MCP tool that touches cohort data or dispatch. Audit review is
-direct filesystem access, outside the MCP interface.
-
-| Tool | CRC | PI | SITE_ADMIN |
-|---|---|---|---|
-| `get_protocol_criteria` | ✅ | ✅ | ❌ |
-| `query_patient_cohort` | ✅ | ✅ | ❌ |
-| `dispatch_screening_alert` | ✅ (draft preview only, never posts to Slack) | ✅ (posts to Slack) | ❌ |
-
 ## Audit log
 
 The gateway writes every access denial as one append-only JSON line to the audit log
@@ -789,9 +707,6 @@ crashes.
 The gateway validates every upstream payload through strict Pydantic v2 models before it
 reaches the LLM or the caller. It rejects a malformed response with a handled error, never an
 unhandled exception.
-
-**The gateway has no caching layer.** `DEGRADED` is the only fallback under failure.
-`tests/unit/test_no_caching_layer.py` enforces this statically.
 
 **Known limitation:** the FHIR circuit breaker's "single live half-open probe" guarantee is a
 plain check with no lock. Concurrent callers in the same post-cooldown window can each pass
@@ -820,55 +735,10 @@ demonstrate it:
   exercises the nested sub-list edge case: a parent header with five LOINC-shaped lab-value
   sub-items.
 
-### Reproduce the live run
-
-The automated test suite never makes a live call. Every test routes through recorded fixtures
-(`mock_upstreams` in `tests/conftest.py`). To reproduce the demo against the real upstreams,
-you need outbound network access to `clinicaltrials.gov` and `clinicaltables.nlm.nih.gov`:
-
-```bash
-.venv/bin/python -c "
-import asyncio
-
-from src.tools.get_protocol_criteria import get_protocol_criteria
-
-
-async def main():
-    for nct_id in ('NCT01370005', 'NCT01779336'):
-        result = await get_protocol_criteria(nct_id)
-        inclusion = result.inclusion_criteria
-        exclusion = result.exclusion_criteria
-        all_criteria = inclusion + exclusion
-        verified = [c for c in all_criteria if c.mapping_status.value == 'VERIFIED']
-        unmapped = [c for c in all_criteria if c.mapping_status.value == 'UNMAPPED']
-        print(f'{nct_id}: inclusion={len(inclusion)} exclusion={len(exclusion)} VERIFIED={len(verified)} UNMAPPED={len(unmapped)}')
-        for c in verified:
-            print(f'  VERIFIED [{c.kind.value}] {c.raw_text!r} -> {c.code_system.value} {c.code}')
-
-
-asyncio.run(main())
-"
-```
-
-To run `query_patient_cohort` and `dispatch_screening_alert` end to end, finish
-[FHIR store setup](#fhir-store-setup). For PI dispatch, also finish
-[Slack setup](#slack-setup). Then connect an MCP client. See
-[Configuring an MCP client](#configuring-an-mcp-client-claude-desktopcode). Then:
-
-1. Call `get_protocol_criteria` with `NCT01370005`. It is the only demo trial with a `VERIFIED`
-   condition code. The call returns `inclusion_criteria` and `exclusion_criteria`.
-2. Call `query_patient_cohort` with that `VERIFIED` code as `condition_code`, and with the
-   `inclusion_criteria` and `exclusion_criteria` lists from step 1. `observation_loinc` is
-   optional. Add a `VERIFIED` LOINC code if the trial has one.
-3. Call `dispatch_screening_alert` with the resulting `nct_id` and candidates. Use a CRC key
-   for a draft preview. Use a PI key with a valid `channel_id` to post to Slack.
-
 ### Observed counts (run date: 2026-09-14)
 
 Registry data can change. These counts are what the run observed on the date above. They are
-not a permanent guarantee. `scripts/capture_fixtures.py` refreshes every recorded test fixture
-from the live APIs on demand. If a count differs, re-run the command above and
-`scripts/capture_fixtures.py` to re-establish the numbers.
+not a permanent guarantee.
 
 | NCT ID | Inclusion | Exclusion | VERIFIED | UNMAPPED |
 |---|---|---|---|---|
