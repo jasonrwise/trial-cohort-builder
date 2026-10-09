@@ -901,54 +901,6 @@ optimizes toward it. Compound criteria, which name several conditions in one bul
 main source of UNMAPPED flags. Decomposing them is out of scope for v1. The 0.80 similarity
 threshold is locked. The project never lowers it, bypasses it or makes it configurable to reduce this count.
 
-## Public export
-
-A maintainer can publish a clean copy of this repo. One command builds a filtered snapshot of a committed state and adds one commit to a local clone of the public repo. The command never pushes. You review the commit, then push it yourself.
-
-You need the [Quickstart](#what-you-need) prerequisites and a local clone of the public repo. Stop your own stack first with `make down`, because the smoke test needs ports 8000, 8080 and 8081.
-
-```bash
-.venv/bin/python -m scripts.public_export \
-  --out /path/to/snapshot \
-  --public-clone /path/to/trial-cohort-builder
-```
-
-`--commit REV` exports a commit other than `HEAD`. The command exports only files that git tracks at that commit. It does not export the working tree.
-
-The command runs six checks and reports each as PASS, FAIL or SKIP. It runs every check, even when an earlier one fails.
-
-| Check | What it proves |
-|---|---|
-| `manifest` | Every entry of the include manifest matches a tracked file and none overlaps a hard exclusion. |
-| `build` | The snapshot holds the manifest files plus a README, a license and a sample client configuration. |
-| `leak-scan` | No home path, personal email, token shape, credential, private repo name or file outside the manifest appears. The report never prints a matched secret. |
-| `readme-links` | The generated README has no broken link, no excluded path and no production or enterprise claim. |
-| `test-suite` | The private test suite passes at the exported commit. |
-| `smoke-test` | `make up` and `make load NCT=NCT99999999 OFFLINE=1` succeed from the snapshot alone, using fake keys. |
-
-Only when all six checks pass does the command make the local commit. If a check fails, the public clone stays unchanged. The report ends with the review and push commands. If the snapshot equals the clone, the command makes no commit.
-
-The smoke test uses a random `tbexport` project name and leaves no container or volume behind. A busy port, a missing container runtime or a missing network fails the export. The command never skips the smoke test.
-
-## Running the tests
-
-```bash
-.venv/bin/python -m pytest -q
-```
-
-The default run is offline. Every test routes through recorded upstream fixtures
-(`mock_upstreams` in `tests/conftest.py`). An autouse guard in `tests/conftest.py` fails any
-test that opens a connection or sends a datagram to the network or to the stack's ports (8000,
-8080 and 8081). It also fails any test that looks up a host name other than localhost. So the
-run passes with the stack stopped. The browser-based UI conformance check is opt-in and
-excluded from this run. See [UI conformance check](#ui-conformance-check). `ruff` and `black`
-are the enforced lint and format gates. Run them the same way: `.venv/bin/ruff check .` and
-`.venv/bin/black --check .`.
-
-The PDF export tests read text back out of the generated PDFs with poppler's `pdftotext`. They
-need poppler-utils: run `sudo apt install poppler-utils` on Debian and Ubuntu. Without it,
-those tests are skipped, not failed.
-
 ## Project status
 
 Five milestones have shipped:
@@ -963,7 +915,6 @@ Five milestones have shipped:
   Quickstart, `make verify`, honest labeling and terminology-outage conformance.
 - **v2.3 Limited demo support for real NCT trials** shipped on 2026-10-06. It added a
   reviewed HbA1c lab-code table, mapper fixes for real-trial wording, partial seeds with a `make verify` check, and the "Partial: N exclusions not evaluated" label on the scorecard, detail view and PDF. Three real trials (NCT00996294, NCT04739241, NCT05591391) seed, verify and replay offline. A real-trial seed is partial. The synthetic protocol is the fully represented demo. A store holds one trial at a time, because the cohort query does not filter by protocol. Run `make reset` between trials.
-- **v2.4 Public export** shipped on 2026-10-09. It added a manual command that turns one committed state of this private repo into one reviewed local commit in a clone of the public repo. The command filters out internal tooling, documents and private data. It runs a leak scan, a README link check, the private test suite and a smoke test of the demo stack. It never pushes. See [Public export](#public-export).
 
 The project deliberately leaves these items out of scope: compound-criteria decomposition, conversational audit-log access, Slack inbound triggers, any caching layer and enterprise IdP auth.
 
