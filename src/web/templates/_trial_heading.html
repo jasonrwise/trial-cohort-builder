@@ -1,0 +1,8 @@
+{#
+  One trial heading line (08.2-07, FR-012, tasks T029): the NCT ID in
+  monospace, then the muted trial title, then an optional state badge.
+  Context: nct_id, trial_title, state_badge ("SCREENED", "FINALIZED" or none).
+  Everything is autoescaped.
+  14-03: SYNTHETIC tag for reserved demo IDs (DEMO-02, AD-28).
+#}
+<h1 class="page-title trial-heading"><span class="mono trial-nct" data-field="nct_id">{{ nct_id }}</span>{% if is_synthetic(nct_id) %} <span class="tag-synthetic">SYNTHETIC</span>{% endif %} <span class="trial-title">· <span data-field="trial_title">{{ trial_title }}</span></span>{% if state_badge %} <span class="badge-{{ state_badge | lower }}" data-field="state">{{ state_badge }}</span>{% endif %}</h1>

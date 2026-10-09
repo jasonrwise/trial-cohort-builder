@@ -1,0 +1,189 @@
+{#
+  Step 3: scorecard (06-03-PLAN.md Task 1 tracer; full rewrite 06-04-PLAN.md
+  Task 2; PI finalize + FINALIZED state added by 07-01-PLAN.md Task 1; full
+  confirm-dialog restatement -- unmapped_criteria_count, discrepancy_count --
+  and interaction-state attributes added by 07-03-PLAN.md Task 1; saved/aged
+  provenance banner added by 08-01-PLAN.md Task 2; Re-run screening control
+  and rejection inline error added by 08-03-PLAN.md Task 1/Task 2;
+  08.2-07: one heading partial, cohort-anchor sentence removed, criteria
+  moved into a closed details#criteria below the results table;
+  08.2-08: Re-run screening in a `.scorecard-toolbar` above the table (FR-016,
+  plan.md D7), four-cell
+  candidate rows with a one-line evidence summary built only from the saved
+  criterion text (D6), the action bar's meta line as one sentence (FR-015) and
+  the PI's #finalize-feedback directly below the bar;
+  08.2-09: the confirm dialog rebuilt to key-confirm-dialog.html, FR-017 --
+  title, permanence note, Protocol/Reference/Screened/Candidates/
+  Not machine-evaluated/Status overridden rows, request shape unchanged);
+  09-01: the toolbar always renders; Re-run screening (when can_rerun) then the
+  Download PDF plain anchor to GET /web/scorecards/<ref>/pdf
+  (contracts/export_pdf.json, FR-027), on every step-3 render;
+  09-05: the anchor carries data-busy-label (app.js swaps it in while the export
+  request is pending) and #pdf-feedback, an empty live region right after the
+  toolbar, receives the "PDF could not be generated." message and Retry link.
+  Context: role, record (ScreenedRecord), anchor (CohortAnchor), approval
+  (ApprovalRecord | None), focus_banner (bool, optional), finalize_notice
+  (str, optional), saved_banner (SavedBanner | None, optional -- set only by
+  get_scorecard.py/rerun_scorecard.py when opened directly, never by a fresh
+  post-screening render), can_rerun (bool, optional -- False whenever the
+  scorecard is FINALIZED, so the control is hidden outright, not merely
+  disabled), rejection (BusinessRejectionError | None, optional -- set only
+  by rerun_scorecard.py's 409 refusal render).
+
+  13-03: the saved banner names the data revision (WEBAPP-10).
+  14-03: SYNTHETIC tag in the confirm dialog Protocol row (DEMO-02, WD-5).
+  14-07: unhonored-criteria count and coverage warning (WEBAPP-11, WD-10).
+  19-01: partial label banner from the shared exclusion count (WEBAPP-12, WEBAPP-13, AD-37).
+
+  Keeps every hook the tracer's own tests already assert on: section#screening-panel,
+  data-field="ref", data-candidate/data-status rows.
+#}
+<section id="screening-panel">
+  {% if approval %}{% include "_finalized_banner.html" %}{% endif %}
+  {% if rejection %}<div class="inline-error" role="alert" data-field="error" data-error="{{ rejection.error }}">{{ rejection.reason }}</div>{% endif %}
+
+  {% if saved_banner %}
+  <div class="{{ 'banner-saved-aged' if saved_banner.aged else 'banner-saved' }}" role="status" data-field="saved_banner">
+    Saved scorecard from {{ record.screened_at.strftime("%Y-%m-%d %H:%M") }} UTC — not recomputed on open · data revision {{ record.data_revision or "unknown" }}{% if saved_banner.aged %} — {{ saved_banner.age_days }} days old{% endif %}.
+  </div>
+  {% endif %}
+
+  {% with current = 3, nct_id = record.nct_id %}
+    {% include "_stepper.html" %}
+  {% endwith %}
+
+  {% set inclusion_snapshot = record.criteria_snapshot | selectattr("kind.value", "equalto", "INCLUSION") | list %}
+  {% set exclusion_snapshot = record.criteria_snapshot | selectattr("kind.value", "equalto", "EXCLUSION") | list %}
+
+  {% with nct_id = record.nct_id, trial_title = record.trial_title,
+          state_badge = ("FINALIZED" if approval else "SCREENED") %}
+    {% include "_trial_heading.html" %}
+  {% endwith %}
+
+  {% set eligible_count = record.candidates | selectattr("eligibility_status", "equalto", "ELIGIBLE") | list | length %}
+  {% set borderline_count = record.candidates | selectattr("eligibility_status", "equalto", "BORDERLINE") | list | length %}
+  {% set ineligible_count = record.candidates | selectattr("eligibility_status", "equalto", "INELIGIBLE") | list | length %}
+  {% set unmapped_criteria_count = record.criteria_snapshot | selectattr("mapping_status.value", "equalto", "UNMAPPED") | list | length %}
+  {% set discrepancy_count = record.candidates | selectattr("recomputed_mismatch") | list | length %}
+  {% set unhonored = unhonored_criteria_count(record.criteria_snapshot) %}
+  {% set unhonored_noun = "criterion" if unhonored == 1 else "criteria" %}
+  {% set unevaluated_count = unevaluated_exclusion_count(record.criteria_snapshot) %}
+
+  <div class="scorecard-toolbar">
+    {% if can_rerun %}
+    <form class="rerun-form" method="post" action="/web/scorecards/{{ record.ref }}/rerun" hx-post="/web/scorecards/{{ record.ref }}/rerun" hx-target="#screening-panel" hx-swap="outerHTML" hx-disabled-elt="find button">
+      <button type="submit" class="btn-secondary"><span class="idle-label">Re-run screening</span><span class="busy-label">Re-running screening&hellip;</span></button>
+    </form>
+    {% endif %}
+    <a href="/web/scorecards/{{ record.ref }}/pdf" class="btn-secondary" data-download-pdf data-busy-label="Preparing PDF…">Download PDF</a>
+  </div>
+  <div id="pdf-feedback" aria-live="polite"></div>
+
+  {% if unevaluated_count > 0 %}
+  <div class="banner-partial-label" role="status" data-field="partial_label"><span class="partial-label-text">Partial: {{ unevaluated_count }} {{ "exclusion" if unevaluated_count == 1 else "exclusions" }} not evaluated</span> ELIGIBLE means no evaluated criterion failed. It does not mean no exclusion applies.</div>
+  {% endif %}
+
+  {% if coverage_gap_warning(unhonored, record.candidates | map(attribute="eligibility_status") | list) %}
+  <div class="banner-coverage-warning" role="status" data-field="coverage_warning">Coverage warning: every candidate is INELIGIBLE while the scorer cannot honor {{ unhonored }} VERIFIED {{ unhonored_noun }} outside the query keys. Treat this as a possible coverage gap, not a clinical result.</div>
+  {% endif %}
+
+  {# Legacy-only (FR-028): this branch renders only scorecards stored empty before FR-028; new queries and Re-runs with no candidates store nothing and render _screening_zero_candidates.html instead. #}
+  {% if not record.candidates %}
+  <div class="inline-note">No candidates matched the verified criteria.</div>
+  {% else %}
+  <div class="table-card">
+  <table class="data-table">
+    <thead>
+      <tr><th>Candidate</th><th>Status</th><th>Flags</th><th>Evidence</th></tr>
+    </thead>
+    <tbody>
+      {% for candidate in record.candidates %}
+      {% if candidate.exclusion_flags %}
+        {% set evidence_summary = "Excl: " ~ (candidate.exclusion_flags | join(" · ")) %}
+      {% elif candidate.matching_criteria %}
+        {% set evidence_summary = candidate.matching_criteria | join(" · ") %}
+      {% else %}
+        {% set evidence_summary = "No criteria matched" %}
+      {% endif %}
+      <tr class="candidate-row" data-candidate="{{ candidate.patient_pseudonym }}" data-status="{{ candidate.eligibility_status }}">
+        <td class="candidate-id"><button type="button" class="expand-affordance code" aria-expanded="false" aria-controls="ev-{{ candidate.patient_pseudonym }}">&#9656; {{ candidate.patient_pseudonym }}</button></td>
+        <td><span class="badge-{{ candidate.eligibility_status | lower }}">{{ candidate.eligibility_status }}</span></td>
+        <td class="flags">
+          {% if candidate.unmapped_criteria %}<span class="chip-unmapped-gap">unmapped gap</span>{% endif %}
+          {% if candidate.recomputed_mismatch %}<span class="chip-discrepancy tooltip" title="LLM proposed {{ candidate.llm_proposed_status }}; gateway computed {{ candidate.eligibility_status }}.">discrepancy</span>{% endif %}
+        </td>
+        <td class="evidence-summary"><span class="evidence-summary-text" title="{{ evidence_summary }}">{{ evidence_summary }}</span></td>
+      </tr>
+      <tr id="ev-{{ candidate.patient_pseudonym }}" class="evidence-row" hidden>
+        <td colspan="4">
+          <div class="evidence-panel">
+            <p><b>Matched:</b> {{ candidate.matching_criteria | join(" · ") if candidate.matching_criteria else "none" }}</p>
+            <p><b>Exclusion flags:</b> {{ candidate.exclusion_flags | join(" · ") if candidate.exclusion_flags else "none" }}</p>
+            <p><b>Unmapped — not evaluated:</b> {{ candidate.unmapped_criteria | join(" · ") if candidate.unmapped_criteria else "none" }}</p>
+            {% if candidate.recomputed_mismatch %}
+            <p>LLM proposed {{ candidate.llm_proposed_status }}; gateway computed {{ candidate.eligibility_status }}.</p>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% endif %}
+
+  <details id="criteria" class="criteria-disclosure">
+    <summary class="section-title">Criteria <span class="unhonored-count">· <span data-field="unhonored_count">{{ unhonored }} VERIFIED {{ unhonored_noun }} the scorer cannot honor</span></span></summary>
+    {% with nct_id = record.nct_id, trial_title = record.trial_title,
+            inclusion = inclusion_snapshot, exclusion = exclusion_snapshot,
+            note = none, degraded_reason = none, error = none, embedded = true,
+            anchor = none %}
+      {% include "_screening_step2.html" %}
+    {% endwith %}
+  </details>
+
+  {% if not approval %}
+  <div class="action-bar">
+    <div class="meta">ref <span class="mono" data-field="ref">{{ record.ref }}</span> · <time data-field="screened_at" datetime="{{ record.screened_at.isoformat() }}">screened {{ record.screened_at.strftime("%Y-%m-%d %H:%M") }} UTC</time> by <span data-field="screened_by_role">{{ record.screened_by_role.value }}</span> · <span class="counts">{{ eligible_count }} ELIGIBLE · {{ borderline_count }} BORDERLINE · {{ ineligible_count }} INELIGIBLE</span></div>
+    <div class="action">
+      {% if role == "CRC" %}
+      <div class="inline-note">Awaiting PI approval — visible to PIs in Scorecards.</div>
+      <button type="button" class="btn-secondary" data-copy-link="/web/scorecards/{{ record.ref }}">Copy link</button>
+      <input type="text" class="copy-link-fallback text-input" readonly hidden value="/web/scorecards/{{ record.ref }}" aria-label="Scorecard link">
+      {% elif role == "PI" %}
+      <button type="button" class="btn-primary" data-open-dialog="confirm-finalize">Approve / Finalize</button>
+      {% endif %}
+    </div>
+  </div>
+  {% if role == "PI" %}
+  <div id="finalize-feedback" aria-live="polite"></div>
+  {% endif %}
+  {% if role == "PI" %}
+  <dialog id="confirm-finalize" class="confirm-dialog" aria-labelledby="confirm-finalize-title" aria-describedby="confirm-finalize-summary">
+    <h2 id="confirm-finalize-title" class="section-title">Finalize this scorecard?</h2>
+    <p class="confirm-note">Finalizing is permanent. A finalized scorecard cannot be edited or re-scored.</p>
+    <dl id="confirm-finalize-summary" class="confirm-summary">
+      <dt>Protocol</dt>
+      <dd><span class="mono" data-field="confirm_nct_id">{{ record.nct_id }}</span>{% if is_synthetic(record.nct_id) %} <span class="tag-synthetic">SYNTHETIC</span>{% endif %} · <span data-field="confirm_trial_title">{{ record.trial_title }}</span></dd>
+      <dt>Reference</dt>
+      <dd><span class="mono" data-field="confirm_ref">{{ record.ref }}</span></dd>
+      <dt>Screened</dt>
+      <dd><span data-field="confirm_screened"><time datetime="{{ record.screened_at.isoformat() }}">{{ record.screened_at.strftime("%Y-%m-%d %H:%M") }} UTC</time> by {{ record.screened_by_role.value }}</span></dd>
+      <dt>Candidates</dt>
+      <dd><span class="badge-eligible"><span data-field="confirm_eligible_count">{{ eligible_count }}</span> ELIGIBLE</span> <span class="badge-borderline"><span data-field="confirm_borderline_count">{{ borderline_count }}</span> BORDERLINE</span> <span class="badge-ineligible"><span data-field="confirm_ineligible_count">{{ ineligible_count }}</span> INELIGIBLE</span></dd>
+      <dt>Not machine-evaluated</dt>
+      <dd><span class="chip-unmapped-gap"><span data-field="confirm_unmapped_count">{{ unmapped_criteria_count }}</span> UNMAPPED {{ "criterion" if unmapped_criteria_count == 1 else "criteria" }}</span></dd>
+      <dt>Status overridden</dt>
+      <dd><span class="chip-discrepancy"><span data-field="confirm_discrepancy_count">{{ discrepancy_count }}</span> {{ "discrepancy" if discrepancy_count == 1 else "discrepancies" }}</span></dd>
+    </dl>
+    <form id="finalize-form" method="post" action="/web/scorecards/{{ record.ref }}/approve" hx-post="/web/scorecards/{{ record.ref }}/approve" hx-target="#screening-panel" hx-swap="outerHTML" hx-sync="this:drop">
+      <input type="hidden" name="nct_id" value="{{ record.nct_id }}">
+      <div class="dialog-actions">
+        <button type="button" class="btn-secondary" data-close-dialog="confirm-finalize" autofocus>Cancel</button>
+        <button type="submit" class="btn-primary" data-busy-label="Finalizing…">Confirm finalize</button>
+      </div>
+    </form>
+  </dialog>
+  {% endif %}
+  {% endif %}
+</section>

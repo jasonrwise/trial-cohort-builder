@@ -1,0 +1,39 @@
+{#
+  Login card (06-06-PLAN.md Task 1, WEBAPP-01; 08.1-01 Task 3 realigned the
+  card to mockups/key-login.html -- title, subtitle, key row, full-width
+  Sign in -- with login-scoped classes per D-02). Context: notice (str or
+  None), error (WebAccessDeniedError or None, read via error.reason),
+  locked (bool). The api_key input never carries a value attribute
+  (T-06-38) -- the raw submitted key is never echoed back into any
+  response. The disclaimer lives in base.html's footer, below this card
+  on every page.
+  08.2-10 (T041): per mockups/key-login.html the notice is a neutral banner
+  above the card (inside .login-stack, at the card's width), and the refusal
+  sits directly under the key row (EXPERIENCE.md Inline error, attached to
+  the failing field), above Sign in.
+#}
+<div class="login-stack">
+{% if notice %}
+<div class="banner-saved login-notice" role="status">{{ notice }}</div>
+{% endif %}
+<section class="login-card">
+  <h1 class="page-title">TrialBridge</h1>
+  <p class="login-subtitle">Screen trial protocols against the synthetic cohort.</p>
+  <form method="post" action="/web/login">
+    <label for="api-key" class="label-caps">API key</label>
+    <div class="login-key-row">
+      <input type="password" id="api-key" name="api_key"
+             class="text-input text-input-key" autocomplete="off" required
+             {% if error %}aria-describedby="login-error"{% endif %}
+             {% if locked %}disabled{% endif %}>
+      <button type="button" class="btn-secondary" aria-pressed="false"
+              aria-controls="api-key" data-toggle-key>Show</button>
+    </div>
+    {% with message = error.reason if error else none, retry_href = none, error_id = "login-error" %}
+      {% include "_inline_error.html" %}
+    {% endwith %}
+    <button type="submit" class="btn-primary login-submit" data-busy-label="Signing in…"
+            {% if locked %}disabled{% endif %}>Sign in</button>
+  </form>
+</section>
+</div>

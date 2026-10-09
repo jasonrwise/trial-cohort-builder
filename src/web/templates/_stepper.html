@@ -1,0 +1,23 @@
+{#
+  Three-step stepper partial (06-04-PLAN.md Task 1).
+  Context: `current` (1, 2 or 3), `nct_id`.
+  Completed steps are links (step-done, circled numeral, label, trailing
+  check mark): step 1 returns to the NCT ID form with the value kept, step 2
+  jumps to #criteria. The current step carries aria-current="step". Upcoming
+  steps are plain text. 08.2-07 (FR-011): circled numerals, trailing check.
+#}
+<nav class="stepper" aria-label="Screening steps">
+  {% for step_num, step_mark, step_label, step_href in [
+    (1, "①", "NCT ID", "/web/screenings/new?nct_id=" ~ nct_id),
+    (2, "②", "Criteria", "#criteria"),
+    (3, "③", "Scorecard", none)
+  ] %}
+    {% if step_num < current %}
+  <a href="{{ step_href }}" class="step-done">{{ step_mark }} {{ step_label }} ✓</a>
+    {% elif step_num == current %}
+  <span class="step-current" aria-current="step">{{ step_mark }} {{ step_label }}</span>
+    {% else %}
+  <span class="step-upcoming">{{ step_mark }} {{ step_label }}</span>
+    {% endif %}
+  {% endfor %}
+</nav>

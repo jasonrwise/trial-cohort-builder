@@ -1,0 +1,38 @@
+# Machine-local / runtime state
+.claude/scheduled_tasks.lock
+.gsd/
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db
+
+# Python environment / tooling caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Runtime secrets and logs (D-02, D-04) — never commit real credentials or audit logs
+keys.json
+logs/*.log*
+logs/*.jsonl
+!keys.example.json
+
+# Archived artifacts
+_archived/
+
+# BMAD personal install answers — machine-local, never shared with the team
+_bmad/config.user.toml
+_bmad/custom/config.user.toml
+
+# Environment variables
+.env
+!.env.example
+
+# Local failing-state images from the UI conformance check (research 5)
+tests/ui_conformance/reports/
+
+# GSD milestone lock (machine-local)
+.planning/milestone.lock

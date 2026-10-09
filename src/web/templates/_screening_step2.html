@@ -1,0 +1,103 @@
+{#
+  Step 2: criteria view (06-04-PLAN.md Task 1, WEBAPP-02).
+  Context: role, nct_id, trial_title, inclusion, exclusion (lists of
+  EligibilityCriterion), anchor (CohortAnchor or None), note (str or None),
+  degraded_reason (str or None), error (dict with error/reason, or None),
+  embedded (bool -- True when included read-only inside step 3).
+
+  Rows are never sorted or grouped by status -- protocol order is the only
+  order (EXPERIENCE.md "Rejected: sorting criteria by verification status").
+
+  `note` is set only by query_screening._render_criteria_only for the two
+  06-01 option-a criteria-only outcomes. When `note` is set, the view states
+  the trial cannot be scored automatically, and it offers no Retry because
+  the outcome is deterministic (G-07-1, 07-05).
+
+  DEGRADED and llm_unavailable are retryable, and Retry is a GET link to
+  the prefilled step-1 form, never a re-POST, because POST /web/screenings
+  mints a ref (06-01 option-a, G-07-1, 07-05).
+
+  The DEGRADED stop's statement that no scorecard was saved is passed into
+  the banner as `terminal_note`, so it shares the banner's alert region and
+  visual container instead of rendering as a disconnected sibling paragraph
+  (260928-beb).
+
+  08.2-07 (FR-012, FR-013, plan.md D1): embedded inside step 3 this partial
+  emits no NCT/title line, no id (the id="criteria" belongs to step 3's
+  <details>) and no Back to NCT ID link. Standalone it keeps id="criteria" and
+  the Back link, and its NCT/title line is the shared _trial_heading.html.
+
+  14-06: one query key marker by position (anchor.query_key_positions); the
+  anchor context key is no longer read here (DEMO-03, WD-8).
+#}
+{% macro criterion_row(criterion, row_id, is_query_key) %}
+  {% set is_verified = criterion.mapping_status.value == "VERIFIED" %}
+  {% if is_verified %}
+  <div class="criteria-row" data-criterion-kind="{{ criterion.kind.value }}" data-mapping-status="VERIFIED">
+    <span class="label-verified">VERIFIED</span>
+    <span class="criterion-text">{{ criterion.raw_text }}</span>
+    <span class="code">
+      {% if criterion.code_system.value == "ICD10CM" %}ICD-10-CM{% else %}LOINC{% endif %}
+      <span class="mono">{{ criterion.code }}</span>
+    </span>
+    {% if criterion.operator %}
+    <span class="operator">{{ criterion.operator.value }}{% if criterion.threshold is not none %} {{ criterion.threshold }}{% endif %}</span>
+    {% endif %}
+    {% if is_query_key %}<span class="query-key-marker">query key</span>{% endif %}
+  </div>
+  {% else %}
+  <div class="criteria-row criteria-row-unmapped" data-criterion-kind="{{ criterion.kind.value }}" data-mapping-status="UNMAPPED">
+    <span class="label-unmapped">UNMAPPED</span>
+    <span class="criterion-text">{{ criterion.raw_text }}</span>
+    <button type="button" class="expand-affordance" aria-expanded="false" aria-controls="rationale-{{ row_id }}">&#9656;</button>
+    <span id="rationale-{{ row_id }}" class="rationale" hidden>UNMAPPED &mdash; could not verify a single ICD-10-CM/LOINC code for this criterion. Requires manual coding.</span>
+  </div>
+  {% endif %}
+{% endmacro %}
+{% if not embedded %}
+<section id="screening-panel">
+{% endif %}
+  {# 08.2-11: state banners render above the stepper (DESIGN.md region order). #}
+  {% with reason = degraded_reason, retry_href = "/web/screenings/new?nct_id=" ~ (nct_id | urlencode), terminal_note = "No scorecard was saved." %}
+    {% include "_degraded_banner.html" %}
+  {% endwith %}
+  {% if not embedded %}
+    {% with current = 2 %}
+      {% include "_stepper.html" %}
+    {% endwith %}
+  {% endif %}
+  {% if error %}
+    {% with message = error.reason, retry_href = "/web/screenings/new?nct_id=" ~ (nct_id | urlencode) %}
+      {% include "_inline_error.html" %}
+    {% endwith %}
+  {% endif %}
+
+  {% if not embedded %}
+    {% include "_trial_heading.html" %}
+  {% endif %}
+  {% if note %}
+  <div class="inline-note" data-terminal="criteria-only">
+    <p>{{ note }}</p>
+    <p>This trial cannot be scored automatically. No cohort query was run and no scorecard was saved.</p>
+  </div>
+  {% endif %}
+
+  <section{% if not embedded %} id="criteria"{% endif %} class="criteria-list">
+    <h2 class="section-title">Inclusion</h2>
+    {% set ns = namespace(i=0) %}
+    {% set key_positions = query_key_positions(inclusion) %}
+    {% for criterion in inclusion %}
+      {% set ns.i = ns.i + 1 %}
+      {{ criterion_row(criterion, "inc-" ~ ns.i, loop.index0 in key_positions) }}
+    {% endfor %}
+    <h2 class="section-title">Exclusion</h2>
+    {% for criterion in exclusion %}
+      {% set ns.i = ns.i + 1 %}
+      {{ criterion_row(criterion, "exc-" ~ ns.i, false) }}
+    {% endfor %}
+  </section>
+
+  {% if not embedded %}
+  <a href="/web/screenings/new?nct_id={{ nct_id }}" class="link">Back to NCT ID</a>
+</section>
+{% endif %}

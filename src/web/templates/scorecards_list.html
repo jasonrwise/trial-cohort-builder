@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{#
+  Full Scorecards page (08-01-PLAN.md Task 1, tasks.md T007; 08-02-PLAN.md
+  Task 1 adds the filter/search form, Task 2 adds the loading skeleton).
+  Context: role, rows (list of ScorecardListRow), state, q, results_state,
+  content_template.
+  08.2-06: the radio input is immediately followed by its label text (no
+  whitespace inside the chip), and the filter form is not rendered when
+  results_state is "empty": the mockup's empty state draws no filter row and
+  an empty store has nothing to filter.
+#}
+{% block content %}
+<section id="scorecards-panel">
+  <div class="page-header">
+    <h1 class="page-title">Scorecards</h1>
+    <a href="/web/screenings/new" class="btn-primary">+ New screening</a>
+  </div>
+  {% if results_state != "empty" %}
+  <form id="scorecards-filter" class="scorecards-filter" method="get" action="/web/scorecards" role="search" hx-get="/web/scorecards" hx-target="#scorecards-results" hx-swap="outerHTML" hx-sync="this:replace" hx-trigger="submit, change from:input[name='state'], input delay:300ms from:input[name='q']">
+    <div class="filter-segmented" role="radiogroup" aria-label="Filter by state">
+      {% for value, label in (("all", "All"), ("awaiting_approval", "Awaiting approval"), ("finalized", "Finalized")) %}
+      <label><input type="radio" name="state" value="{{ value }}"{% if state == value %} checked{% endif %}>{{ label }}</label>
+      {% endfor %}
+    </div>
+    <input type="search" id="scorecards-q" name="q" class="text-input" value="{{ q }}" placeholder="Search NCT ID or title" aria-label="Search NCT ID or title" autocomplete="off">
+    <div class="htmx-indicator" aria-hidden="true">
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+    </div>
+  </form>
+  {% endif %}
+  {% include content_template %}
+</section>
+{% endblock %}

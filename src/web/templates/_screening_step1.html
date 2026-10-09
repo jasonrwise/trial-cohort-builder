@@ -1,0 +1,33 @@
+{#
+  Step 1: NCT ID form (06-04-PLAN.md Task 1, WEBAPP-02).
+  Context: role, nct_id (default ""), field_error (str or None),
+  degraded_reason (str or None).
+#}
+<section id="screening-panel">
+  {% with reason = degraded_reason, retry_href = none %}
+    {% include "_degraded_banner.html" %}
+  {% endwith %}
+  {% with current = 1 %}
+    {% include "_stepper.html" %}
+  {% endwith %}
+
+  <form method="post" action="/web/screenings" hx-post="/web/screenings"
+        hx-target="#screening-panel" hx-swap="outerHTML">
+    <label for="nct_id">NCT ID</label>
+    <input type="text" id="nct_id" name="nct_id" class="text-input text-input-key"
+           value="{{ nct_id }}" pattern="NCT[0-9]{8}" required autocomplete="off"
+           {% if field_error %}aria-describedby="nct_id-error"{% endif %}>
+    {% with message = field_error, retry_href = none, error_id = "nct_id-error" %}
+      {% include "_inline_error.html" %}
+    {% endwith %}
+    <button type="submit" class="btn-primary" hx-disabled-elt="this">
+      <span class="idle-label">Run screening</span>
+      <span class="busy-label">Running screening&hellip;</span>
+    </button>
+    <div class="htmx-indicator" aria-hidden="true">
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+      <div class="skeleton-row"></div>
+    </div>
+  </form>
+</section>

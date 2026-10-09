@@ -1,0 +1,65 @@
+{#
+  Results region fragment (08-01-PLAN.md Task 1, tasks.md T007; 08-02-PLAN.md
+  Task 2 adds every list state). Context: rows (list of ScorecardListRow),
+  state, q, results_state ("rows"/"empty"/"search-miss"/"filter-empty"/
+  "load-failed"). This is the htmx swap target for 08-02's filter and search
+  inputs. All values are autoescaped; never `|safe`.
+  13-03: Data revision column (WEBAPP-10, EXPERIENCE.md).
+  14-03: SYNTHETIC tag (DEMO-02).
+  08.2-06: the rows table sits in `.table-card`; the empty state is the
+  `.empty-state` card; search-miss and filter-empty messages are `.results-note`
+  cards (the mockup's centred cards).
+#}
+<div id="scorecards-results" data-results-state="{{ results_state }}">
+  {% if results_state == "rows" %}
+  <div class="table-card">
+  <table class="data-table">
+    <thead>
+      <tr><th>Protocol</th><th>Screened at</th><th>Screened by</th><th>State</th><th>Data revision</th></tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr class="scorecard-row" data-ref="{{ row.ref }}" data-state="{{ row.state }}">
+        <td>
+          <a href="/web/scorecards/{{ row.ref }}" class="mono" data-field="nct_id">{{ row.nct_id }}</a>{% if is_synthetic(row.nct_id) %} <span class="tag-synthetic">SYNTHETIC</span>{% endif %}
+          <br>
+          <span data-field="trial_title">{{ row.trial_title }}</span>
+        </td>
+        <td>
+          <time data-field="screened_at" datetime="{{ row.screened_at.isoformat() }}">{{ row.screened_at.strftime("%Y-%m-%d %H:%M") }} UTC</time>
+        </td>
+        <td><span data-field="screened_by_role">{{ row.screened_by_role }}</span></td>
+        <td>
+          {% if row.state == "FINALIZED" %}
+          <span class="badge-finalized" data-field="state">FINALIZED</span>
+          by <span data-field="finalized_by_role">{{ row.finalized_by_role }}</span>
+          · <time data-field="finalized_at" datetime="{{ row.finalized_at.isoformat() }}">{{ row.finalized_at.strftime("%Y-%m-%d %H:%M") }} UTC</time>
+          {% else %}
+          <span class="badge-screened" data-field="state">SCREENED</span>
+          {% endif %}
+        </td>
+        <td><span class="mono quiet" data-field="data_revision">{{ row.data_revision or "unknown" }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% elif results_state == "empty" %}
+  <div class="empty-state">
+    <p>Screen a protocol against the synthetic cohort: fetch criteria → verify codes → score candidates.</p>
+    <p>A PI finalizes the result.</p>
+    <a href="/web/screenings/new" class="btn-primary">+ New screening</a>
+  </div>
+  {% elif results_state == "search-miss" %}
+  <div class="results-note">No scorecards match "{{ q }}". <a href="/web/scorecards?state={{ state }}" class="link">Clear search</a></div>
+  {% elif results_state == "filter-empty" %}
+  <div class="results-note">
+    {% if state == "awaiting_approval" %}No scorecards awaiting approval.{% else %}No finalized scorecards.{% endif %}
+    <a href="/web/scorecards" class="link">Show all</a>
+  </div>
+  {% elif results_state == "load-failed" %}
+  {% with message = "Scorecards could not be loaded.", retry_href = "/web/scorecards", error_id = none %}
+  {% include "_inline_error.html" %}
+  {% endwith %}
+  {% endif %}
+</div>

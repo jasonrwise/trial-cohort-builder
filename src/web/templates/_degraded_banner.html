@@ -1,0 +1,21 @@
+{#
+  DEGRADED banner partial (06-04-PLAN.md Task 1).
+  Context (via a `with` block at the include site): `reason` (str or None),
+  `retry_href` (str or None). Renders nothing when `reason` is falsy. The
+  reason text is the gateway's own string, rendered verbatim (Voice and
+  Tone: never UX-authored outage prose) -- autoescaped like every other
+  sourced string here.
+
+  `terminal_note` (str or None, optional): a caller-authored consequence
+  line, rendered as the banner's second line inside the alert region so
+  assistive tech announces it together with the banner. It is not outage
+  prose -- the reason above stays the gateway's verbatim string per the
+  Voice and Tone rule. Step 1 omits it (260928-beb, 07-UI-REVIEW.md).
+#}
+{% if reason %}
+<div class="banner-degraded" role="alert">
+  <span class="status-text">DEGRADED</span> {{ reason }}
+  {% if retry_href %}<a href="{{ retry_href }}" class="link">Retry</a>{% endif %}
+  {% if terminal_note %}<div data-terminal="degraded">{{ terminal_note }}</div>{% endif %}
+</div>
+{% endif %}

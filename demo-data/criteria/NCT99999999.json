@@ -1,0 +1,31 @@
+{
+  "captured_at": "2026-10-02T20:24:30+00:00",
+  "content_sha256": "c0a9233cd106067963c1d74a33cc347cd385effe7cd27a4d4095e45579c72188",
+  "snapshot_schema_version": 1,
+  "trial": {
+    "exclusion_criteria": [],
+    "inclusion_criteria": [
+      {
+        "code": "E11.9",
+        "code_system": "ICD10CM",
+        "kind": "INCLUSION",
+        "mapping_status": "VERIFIED",
+        "operator": "PRESENT",
+        "raw_text": "Diagnosis of type 2 diabetes mellitus",
+        "threshold": null
+      },
+      {
+        "code": "4548-4",
+        "code_system": "LOINC",
+        "kind": "INCLUSION",
+        "mapping_status": "VERIFIED",
+        "operator": "GTE",
+        "raw_text": "HbA1c MFr Bld >= 7.5 %",
+        "threshold": 7.5
+      }
+    ],
+    "nct_id": "NCT99999999",
+    "status": "OK",
+    "title": "SYNTHETIC DEMO PROTOCOL: Type 2 diabetes with elevated HbA1c"
+  }
+}

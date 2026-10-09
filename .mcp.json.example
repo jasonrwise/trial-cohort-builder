@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "trialbridge-mcp": {
+      "command": "/path/to/trial-cohort-builder/.venv/bin/python",
+      "args": [
+        "-m",
+        "src.server"
+      ],
+      "env": {
+        "TRIALBRIDGE_KEYS_FILE": "/path/to/trial-cohort-builder/keys.json",
+        "TRIALBRIDGE_AUDIT_LOG_PATH": "/path/to/trial-cohort-builder/logs/audit.log",
+        "TRIALBRIDGE_API_KEY": "tb_demo_fake_crc_0000000000000000",
+        "FHIR_BASE_URL": "http://localhost:8080/fhir",
+        "FHIR_TOKEN_URL": "http://localhost:8081/token",
+        "FHIR_CLIENT_ID": "local-dev",
+        "FHIR_CLIENT_SECRET": "local-dev",
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}"
+      }
+    }
+  }
+}

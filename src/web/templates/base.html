@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="htmx-config" content='{"responseHandling":[{"code":"204","swap":false},{"code":"[23]..","swap":true},{"code":"[45]..","swap":true,"error":true}]}'>
+  <title>TrialBridge</title>
+  <link rel="stylesheet" href="/web/static/app.css">
+</head>
+<body>
+  {# 08.2-04, FR-001: one column wraps banner, main and disclaimer (research §3 / plan.md D2, banner inside the column) #}
+  <div class="content-column">
+  {% if role %}
+  <div class="banner-role"><span>Signed in as <strong>{{ role }}</strong> &middot; role resolved by server &middot; <a href="/web/scorecards" class="link">Scorecards</a></span><a href="/web/logout" class="link">Sign out</a></div>
+  {% endif %}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  {# 14-02: source-neutral disclaimer (DEMO-04, PRD FR-37) #}
+  <footer class="disclaimer">All patient records are synthetic data. Not for clinical use.</footer>
+  </div>
+  <script src="/web/static/htmx.min.js" defer></script>
+  <script src="/web/static/app.js" defer></script>
+</body>
+</html>

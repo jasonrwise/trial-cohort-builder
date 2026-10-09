@@ -1,0 +1,12 @@
+{#
+  FINALIZED banner (07-01-PLAN.md Task 1). Context: approval (ApprovalRecord),
+  focus_banner (bool, optional), finalize_notice (str, optional; used by
+  07-02 for the "already finalized elsewhere" reload path).
+#}
+<div id="finalized-banner" class="banner-finalized" role="status" tabindex="-1"{% if focus_banner %} data-focus-on-swap{% endif %}>
+  <span class="status-text">FINALIZED</span>
+  by <span data-field="finalized_by_role">{{ approval.approved_by_role }}</span> ·
+  <time data-field="finalized_at" datetime="{{ approval.approved_at.isoformat() }}">{{ approval.approved_at.strftime("%Y-%m-%d %H:%M") }} UTC</time> ·
+  ref <span class="mono" data-field="ref">{{ approval.screened_ref }}</span>
+</div>
+{% if finalize_notice %}<p class="inline-note" data-field="finalize_notice">{{ finalize_notice }}</p>{% endif %}

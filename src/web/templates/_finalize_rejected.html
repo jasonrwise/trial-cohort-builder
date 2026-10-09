@@ -1,0 +1,8 @@
+{#
+  Inline rejection fragment for a finalize attempt (07-02-PLAN.md Task 2).
+  Context: role (str), error (str -- the BusinessRejectionError/NotFoundError
+  code), reason (str). The dialog has already closed by the time this swaps
+  in; it lands in the PI action bar's #finalize-feedback region
+  (EXPERIENCE.md "Approve rejected by server"). Autoescaped -- never |safe.
+#}
+<div class="inline-error" role="alert" data-field="error" data-error="{{ error }}">{{ reason }}</div>

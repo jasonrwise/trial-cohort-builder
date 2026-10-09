@@ -1,0 +1,122 @@
+{
+  "captured_at": "2026-10-06T22:09:35+00:00",
+  "content_sha256": "dbb582a0148e008b4c3b8593b86f2539bbae99035cce17f8f692478c33f3bb37",
+  "snapshot_schema_version": 1,
+  "trial": {
+    "exclusion_criteria": [
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Specific contraindication to obesity surgery or biliopancreatic diversion or gastric bypass",
+        "threshold": null
+      },
+      {
+        "code": "Z33.1",
+        "code_system": "ICD10CM",
+        "kind": "EXCLUSION",
+        "mapping_status": "VERIFIED",
+        "operator": null,
+        "raw_text": "Pregnancy",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Medical conditions requiring acute hospitalisation",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Severe diabetes complications or associated medical conditions \\[such as blindness, end-stage renal failure (i.e. serum creatinine >2 mg/dl), liver cirrhosis, malignancy, chronic congestive heart failure (NYHA class III and IV)\\]",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Recent (within preceding 12 months) myocardial infarction, stroke or TIA",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Unstable angina pectoris",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Psychological conditions which may hamper patient's cooperation",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Geographic inaccessibility",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Any condition which, in the judgment of the Investigator, may make risky the participation in the study or bias the results",
+        "threshold": null
+      }
+    ],
+    "inclusion_criteria": [
+      {
+        "code": "E11.9",
+        "code_system": "ICD10CM",
+        "kind": "INCLUSION",
+        "mapping_status": "VERIFIED",
+        "operator": null,
+        "raw_text": "Type 2 diabetes mellitus",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "INCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Duration of diabetes ≥ 3 years",
+        "threshold": null
+      },
+      {
+        "code": "4548-4",
+        "code_system": "LOINC",
+        "kind": "INCLUSION",
+        "mapping_status": "VERIFIED",
+        "operator": "GTE",
+        "raw_text": "Poor glycemic control (i.e., HbA1c ≥ 7.5%) in spite of hypoglycemic therapy in accordance with good clinical practice (GCP)",
+        "threshold": 7.5
+      }
+    ],
+    "nct_id": "NCT00996294",
+    "status": "OK",
+    "title": "Surgical Treatment of Type 2 Diabetes Mellitus in <35 Body Mass Index (BMI)"
+  }
+}

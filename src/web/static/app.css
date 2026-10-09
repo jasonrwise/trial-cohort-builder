@@ -1,0 +1,1006 @@
+/*
+ * TrialBridge web UI stylesheet.
+ *
+ * Source of truth: _bmad-output/planning-artifacts/ux-designs/ux-trialbridge-mcp-2026-09-22/DESIGN.md
+ * ("Theme D — Readable clinical"). Every light colour token below has a `-dark` twin
+ * redefined inside the `prefers-color-scheme: dark` media query. Components reference
+ * only the base `--color-*` name; dark-mode resolution happens purely through the
+ * media query re-assigning the custom property value (DESIGN.md "Dark-mode resolution").
+ *
+ * Font files are not vendored in this phase (flagged assumption, see 06-01-PLAN.md
+ * Artifacts section) — browsers fall back to the system-ui / ui-monospace stacks
+ * below until Source Sans 3 / Source Code Pro are vendored.
+ */
+
+:root {
+  /* Colour tokens (light) */
+  --color-background: #F6F7F9;
+  --color-surface: #FFFFFF;
+  --color-surface-sunken: #FAFBFC;
+  --color-border: #D5DAE1;
+  --color-input-border: #868F9C;
+  --color-text: #111827;
+  --color-text-muted: #4B5563;
+  --color-primary: #1C4F9C;
+  --color-primary-tint: #E3EBF7;
+  --color-on-primary: #FFFFFF;
+  --color-eligible: #166534;
+  --color-eligible-bg: #E3F4E8;
+  --color-borderline: #854D0E;
+  --color-borderline-bg: #FCF0D6;
+  --color-ineligible: #991B1B;
+  --color-ineligible-bg: #FBE7E7;
+  --color-verified: #166534;
+  --color-unmapped: #854D0E;
+  --color-unmapped-bg: #FCF0D6;
+  --color-system: #5B3FA8;
+  --color-system-bg: #EEEAFB;
+  --color-danger: #BE123C;
+  --color-danger-bg: #FFF1F2;
+  --color-skeleton: #E5E8EC;
+
+  /* Typography tokens */
+  --font-ui: "Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Source Code Pro", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --font-size-page-title: 24px;
+  --font-weight-page-title: 600;
+  --line-height-page-title: 1.25;
+
+  --font-size-section-title: 18px;
+  --font-weight-section-title: 600;
+  --line-height-section-title: 1.3;
+
+  --font-size-body: 16px;
+  --font-weight-body: 400;
+  --line-height-body: 1.5;
+
+  --font-weight-nav-link: 600;
+
+  --font-size-table: 14px;
+  --font-weight-table: 400;
+  --line-height-table: 1.4;
+
+  --font-size-label-caps: 12px;
+  --font-weight-label-caps: 700;
+  --letter-spacing-label-caps: 0.08em;
+
+  --font-size-code: 13px;
+  --font-weight-code: 400;
+
+  --font-size-status: 12px;
+  --font-weight-status: 700;
+  --letter-spacing-status: 0.02em;
+
+  --font-weight-btn: 600;
+
+  /* Radius tokens */
+  --rounded-sm: 4px;
+  --rounded-md: 6px;
+  --rounded-lg: 8px;
+  --rounded-full: 9999px;
+
+  /* Spacing tokens */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 28px;
+  --space-7: 40px;
+  --row-pad: 10px;
+  --page-max: 1200px;
+  --min-viewport: 1024px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #111418;
+    --color-surface: #191D23;
+    --color-surface-sunken: #15181D;
+    --color-border: #2B313A;
+    --color-input-border: #667281;
+    --color-text: #EEF1F5;
+    --color-text-muted: #AAB3BF;
+    --color-primary: #7AA7EC;
+    --color-primary-tint: #1C2638;
+    --color-on-primary: #111418;
+    --color-eligible: #5FD38D;
+    --color-eligible-bg: #142A1C;
+    --color-borderline: #F0C25E;
+    --color-borderline-bg: #2C2413;
+    --color-ineligible: #F29A9A;
+    --color-ineligible-bg: #2E1A1A;
+    --color-verified: #5FD38D;
+    --color-unmapped: #F0C25E;
+    --color-unmapped-bg: #2C2413;
+    --color-system: #B7A3F0;
+    --color-system-bg: #241E38;
+    --color-danger: #FB7185;
+    --color-danger-bg: #2E1520;
+    --color-skeleton: #262B33;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Base / layout                                                          */
+/* ---------------------------------------------------------------------- */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+}
+
+.content-column {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-6) var(--space-6);
+}
+
+h1.page-title,
+.page-title {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-page-title);
+  font-weight: var(--font-weight-page-title);
+  line-height: var(--line-height-page-title);
+  margin: 0;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+/* 08.2-06 (FR-009): the mockup h2's 4px/12px margins sit inside the heading
+   row, so the row-to-filter-row gap is 0 as drawn. */
+.page-header .page-title {
+  margin: var(--space-1) 0 var(--space-3);
+}
+
+h2.section-title,
+.section-title {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-section-title);
+  font-weight: var(--font-weight-section-title);
+  line-height: var(--line-height-section-title);
+  margin: 0;
+}
+
+.label-caps {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-label-caps);
+  font-weight: var(--font-weight-label-caps);
+  letter-spacing: var(--letter-spacing-label-caps);
+  text-transform: uppercase;
+}
+
+code,
+.code,
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-code);
+  font-weight: var(--font-weight-code);
+}
+
+/* Quiet column text (EXPERIENCE.md "Data revision (as of)"): colour only. */
+.quiet {
+  color: var(--color-text-muted);
+}
+
+.status-text {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-status);
+  font-weight: var(--font-weight-status);
+  letter-spacing: var(--letter-spacing-status);
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Focus / disabled                                                       */
+/* ---------------------------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+[disabled],
+[aria-disabled="true"],
+.control-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Links and buttons                                                      */
+/* ---------------------------------------------------------------------- */
+
+a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border: none;
+  border-radius: var(--rounded-md);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-btn);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+/* 08.2-06 (FR-008): the anchor form of the primary button (page header and
+   empty state) drops the link underline. Separate rule: the base block above
+   is pinned by 08.1. */
+a.btn-primary {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--rounded-md);
+  font-weight: var(--font-weight-btn);
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+/* 09-05: the anchor form of the secondary button (Download PDF) drops the link
+   underline. Separate rule: the shared .btn-secondary is used by Copy link, Cancel and
+   Re-run in states that are green today. font-size and line-height are the computed
+   values of the toolbar's <button class="btn-secondary"> (the browser's button font: 13.3333px Arial,
+   line-height normal, which uses 15px of content height here). The anchor's own font family has a
+   taller normal line, so the line height is pinned to 15px; the anchor and the Re-run button
+   beside it then share one box height (31px). */
+a.btn-secondary {
+  display: inline-block;
+  text-decoration: none;
+  font-size: 13.3333px;
+  line-height: 15px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Inputs                                                                 */
+/* ---------------------------------------------------------------------- */
+
+.text-input {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--rounded-sm);
+  padding: 8px 10px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+}
+
+.text-input-key {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-code);
+}
+
+/* ---------------------------------------------------------------------- */
+/* 08-02: segmented state filter built from native radios                 */
+/* ---------------------------------------------------------------------- */
+
+.scorecards-filter {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+#scorecards-q {
+  margin-left: auto;
+  width: 320px;
+  font-size: var(--font-size-table);
+}
+
+/* 08.2-06 (FR-006): the mockup draws three separate chips, so the
+   filter-segmented token (border, radius, selected colours) applies per chip. */
+.filter-segmented {
+  display: inline-flex;
+  gap: var(--space-3);
+}
+
+.filter-segmented label {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--rounded-md);
+  background: var(--color-surface);
+  font-size: var(--font-size-table);
+  cursor: pointer;
+}
+
+.filter-segmented input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+
+.filter-segmented label:has(input:checked) {
+  background: var(--color-primary-tint);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-btn);
+}
+
+.filter-segmented label:has(input:focus-visible) {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Banners                                                                */
+/* ---------------------------------------------------------------------- */
+
+.banner-role {
+  background: var(--color-primary-tint);
+  color: var(--color-text);
+  border-radius: var(--rounded-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.banner-role .link {
+  font-weight: var(--font-weight-nav-link);
+}
+
+.banner-degraded {
+  background: var(--color-system-bg);
+  color: var(--color-system);
+  border-left: 4px solid var(--color-system);
+  border-radius: var(--rounded-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.banner-saved {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--rounded-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.banner-saved-aged {
+  background: var(--color-borderline-bg);
+  color: var(--color-borderline);
+  border: 1px solid var(--color-borderline);
+  border-radius: var(--rounded-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+/* Coverage warning (WEBAPP-11): the saved-aged amber, same declarations. */
+.banner-coverage-warning {
+  background: var(--color-borderline-bg);
+  color: var(--color-borderline);
+  border: 1px solid var(--color-borderline);
+  border-radius: var(--rounded-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+/* Partial label (WEBAPP-12): the coverage warning's amber, same declarations. [ASSUMPTION] The UX pair has no entry yet; see 19-01-PLAN.md LD-5. */
+.banner-partial-label {
+  background: var(--color-borderline-bg);
+  color: var(--color-borderline);
+  border: 1px solid var(--color-borderline);
+  border-radius: var(--rounded-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.banner-finalized {
+  background: var(--color-eligible-bg);
+  color: var(--color-eligible);
+  border-left: 4px solid var(--color-eligible);
+  border-radius: var(--rounded-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.inline-error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--rounded-md);
+  padding: var(--space-2) var(--space-3);
+}
+
+.inline-note {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-body);
+}
+
+/* 08.2-06: list result cards as the mockup draws them. */
+.empty-state,
+.results-note {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--rounded-md);
+  text-align: center;
+}
+
+.empty-state {
+  padding: var(--space-7);
+}
+
+.empty-state p {
+  margin: 0 0 var(--space-2);
+}
+
+.empty-state p + p {
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-5);
+}
+
+.results-note {
+  padding: var(--space-6);
+}
+
+.table-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--rounded-md);
+  overflow: hidden;
+}
+
+.table-card .data-table {
+  border: none;
+  border-radius: 0;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Badges, labels, chips                                                  */
+/* ---------------------------------------------------------------------- */
+
+.badge-eligible {
+  background: var(--color-eligible-bg);
+  color: var(--color-eligible);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-status);
+  font-weight: var(--font-weight-status);
+  letter-spacing: var(--letter-spacing-status);
+  border-radius: var(--rounded-sm);
+  padding: 2px 6px;
+}
+
+.badge-borderline {
+  background: var(--color-borderline-bg);
+  color: var(--color-borderline);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-status);
+  font-weight: var(--font-weight-status);
+  letter-spacing: var(--letter-spacing-status);
+  border-radius: var(--rounded-sm);
+  padding: 2px 6px;
+}
+
+.badge-ineligible {
+  background: var(--color-ineligible-bg);
+  color: var(--color-ineligible);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-status);
+  font-weight: var(--font-weight-status);
+  letter-spacing: var(--letter-spacing-status);
+  border-radius: var(--rounded-sm);
+  padding: 2px 6px;
+}
+
+.badge-finalized {
+  background: var(--color-eligible-bg);
+  color: var(--color-eligible);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-status);
+  font-weight: var(--font-weight-status);
+  letter-spacing: var(--letter-spacing-status);
+  border-radius: var(--rounded-sm);
+  padding: 2px 6px;
+}
+
+.badge-screened {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-status);
+  font-weight: var(--font-weight-status);
+  letter-spacing: var(--letter-spacing-status);
+  border-radius: var(--rounded-sm);
+  padding: 2px 6px;
+}
+
+/* DESIGN.md tag-synthetic and query-key-marker: two identical tokens, text in neutral chrome,
+   never colour alone, not interactive. */
+.tag-synthetic,
+.query-key-marker {
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--rounded-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-status);
+  font-weight: var(--font-weight-status);
+  letter-spacing: var(--letter-spacing-status);
+  padding: 2px 6px;
+}
+
+.label-verified {
+  color: var(--color-verified);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-status);
+  font-weight: var(--font-weight-status);
+  letter-spacing: var(--letter-spacing-status);
+}
+
+.label-unmapped {
+  color: var(--color-unmapped);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-status);
+  font-weight: var(--font-weight-status);
+  letter-spacing: var(--letter-spacing-status);
+}
+
+.chip-unmapped-gap {
+  color: var(--color-unmapped);
+  border: 1px solid var(--color-unmapped);
+  border-radius: var(--rounded-full);
+  padding: 1px 8px;
+  display: inline-block;
+}
+
+.chip-discrepancy {
+  color: var(--color-system);
+  border: 1px solid var(--color-system);
+  border-radius: var(--rounded-full);
+  padding: 1px 8px;
+  display: inline-block;
+}
+
+.criteria-row-unmapped {
+  background: var(--color-unmapped-bg);
+  border-left: 3px solid var(--color-unmapped);
+}
+
+.expand-affordance {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.evidence-panel {
+  background: var(--color-surface-sunken);
+  font-size: var(--font-size-table);
+}
+
+.evidence-panel p {
+  margin: 0 0 var(--space-1);
+}
+
+.evidence-panel b {
+  font-weight: var(--font-weight-btn);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Tables                                                                 */
+/* ---------------------------------------------------------------------- */
+
+.data-table {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--rounded-md);
+  font-size: var(--font-size-table);
+  font-weight: var(--font-weight-table);
+  line-height: var(--line-height-table);
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-label-caps);
+  font-weight: var(--font-weight-label-caps);
+  letter-spacing: var(--letter-spacing-label-caps);
+  text-transform: uppercase;
+  text-align: left;
+  padding: var(--space-2) var(--row-pad);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table td {
+  padding: var(--row-pad);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.skeleton-row {
+  background: var(--color-skeleton);
+  height: 12px;
+  border-radius: var(--rounded-sm);
+}
+
+.tooltip {
+  background: var(--color-text);
+  color: var(--color-surface);
+  border-radius: var(--rounded-sm);
+  font-size: var(--font-size-table);
+  padding: var(--space-1) var(--space-2);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Action bar / stepper                                                   */
+/* ---------------------------------------------------------------------- */
+
+.step-current {
+  color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.step-done {
+  color: var(--color-eligible);
+}
+
+.step-upcoming {
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Login card / confirm dialog / disclaimer                              */
+/* ---------------------------------------------------------------------- */
+
+/* The stack carries the outer margins so the notice banner (08.2-10, T041)
+   can sit above the card at the card's width, per key-login.html. */
+.login-stack {
+  width: 440px;
+  margin: var(--space-7) auto 0;
+}
+
+.login-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--rounded-md);
+  margin: 0;
+  padding: var(--space-4);
+}
+
+.login-card .inline-error {
+  margin-top: var(--space-2);
+}
+
+.login-card .login-subtitle {
+  color: var(--color-text-muted);
+  margin: var(--space-3) 0 var(--space-4);
+}
+
+.login-card form {
+  margin-top: var(--space-3);
+}
+
+.login-card label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.login-card .login-key-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.login-card .login-key-row .text-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.login-card .login-submit {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-4);
+}
+
+.confirm-dialog {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--rounded-lg);
+  box-shadow: 0 8px 20px rgba(20, 24, 28, 0.12);
+  width: 560px;
+  padding: 22px 24px;
+}
+
+.confirm-dialog::backdrop {
+  background: rgba(17, 20, 24, 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  .confirm-dialog {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  }
+}
+
+.confirm-dialog-scrim {
+  background: rgba(17, 20, 24, 0.45);
+}
+
+.confirm-dialog .section-title {
+  margin: 0;
+}
+
+.confirm-note {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+}
+
+.confirm-summary {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: var(--space-2) var(--space-3);
+  margin: var(--space-3) 0 var(--space-4);
+}
+
+.confirm-summary dt {
+  color: var(--color-text-muted);
+}
+
+.confirm-summary dd {
+  margin: 0;
+}
+
+.confirm-summary dd .badge-eligible,
+.confirm-summary dd .badge-borderline,
+.confirm-summary dd .badge-ineligible {
+  margin-right: var(--space-1);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: 0;
+}
+
+.disclaimer {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-table);
+  text-align: center;
+  margin-top: var(--space-5);
+}
+
+/* On login the disclaimer sits under the card at the card's width
+   (440px = DESIGN.md login-card.width; FR-002, US1 AS3). */
+.content-column:has(.login-card) > .disclaimer {
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ---------------------------------------------------------------------- */
+/* htmx busy-state helpers (EXPERIENCE.md State Patterns)                 */
+/* ---------------------------------------------------------------------- */
+
+.htmx-indicator {
+  display: none;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+  display: inline;
+}
+
+.busy-label {
+  display: none;
+}
+
+.htmx-request .busy-label {
+  display: inline;
+}
+
+.htmx-request .idle-label {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------- */
+/* 06-04: scorecard interaction styling (evidence rows, action bar,       */
+/* stepper layout, chip spacing, tooltip, skeleton shimmer)               */
+/* ---------------------------------------------------------------------- */
+
+tr.evidence-row[hidden] {
+  display: none;
+}
+
+tr.evidence-row td {
+  padding: var(--space-3) var(--space-4);
+}
+
+tr.candidate-row {
+  cursor: pointer;
+}
+
+/* 08.2-07 (FR-011): the mockup's 24px step gap has no token; --space-5 (20px)
+   is the nearest (research section 9 (j)). */
+.stepper {
+  display: flex;
+  gap: var(--space-5);
+  align-items: center;
+  list-style: none;
+  margin: var(--space-1) 0 var(--space-3);
+  padding: 0;
+}
+
+.stepper a {
+  text-decoration: none;
+}
+
+/* 08.2-07 (FR-012): one heading line, NCT mono 22px (mockup inline size, no
+   token; the code token is 13px), muted title at body weight. */
+/* Two classes so this outranks `h1.page-title { margin: 0 }`; the 12px below is
+   the mockup's heading to toolbar gap (08.2-08). */
+.page-title.trial-heading {
+  margin: var(--space-1) 0 var(--space-3);
+}
+
+.trial-heading .trial-nct {
+  font-size: 22px;
+}
+
+.trial-heading .trial-title {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-body);
+}
+
+.trial-heading [class^="badge-"] {
+  margin-left: var(--space-2);
+  vertical-align: middle;
+}
+
+/* 08.2-07 (FR-014 criteria half, plan.md D1): the criteria snapshot is a
+   closed card below the results table, laid out per DESIGN.md's Criteria list. */
+.criteria-disclosure {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--rounded-md);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.criteria-disclosure > summary {
+  cursor: pointer;
+}
+
+/* WEBAPP-11: the count of VERIFIED criteria the scorer cannot honor, on the
+   summary's single line. */
+.unhonored-count {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-table);
+  font-weight: var(--font-weight-body);
+}
+
+.criteria-list .section-title {
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.criteria-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: var(--row-pad) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.criteria-row .criterion-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.criteria-row .code {
+  margin-left: auto;
+}
+
+.criteria-row .rationale {
+  flex-basis: 100%;
+}
+
+/* 08.2-08 (FR-015): one action-bar rule; the surface background is DESIGN.md's
+   action-bar token (research section 9 (m)). */
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.action-bar .meta {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-table);
+}
+
+#finalize-feedback .inline-error {
+  margin-top: var(--space-2);
+}
+
+#pdf-feedback .inline-error {
+  margin-bottom: var(--space-2);
+}
+
+.scorecard-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.evidence-summary-text {
+  display: block;
+  max-width: 36ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.action-bar .action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.chip-unmapped-gap,
+.chip-discrepancy {
+  margin-right: var(--space-2);
+}
+
+.tooltip[title] {
+  cursor: help;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.skeleton-row {
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+}

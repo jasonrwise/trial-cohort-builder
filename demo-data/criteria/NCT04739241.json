@@ -1,0 +1,113 @@
+{
+  "captured_at": "2026-10-06T22:10:29+00:00",
+  "content_sha256": "e94b7273cc1d5bba0a52e3a9f55121e99db12d92f40bc28bf89b468b97f2e0a3",
+  "snapshot_schema_version": 1,
+  "trial": {
+    "exclusion_criteria": [
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Severe insulin-resistance",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "High doses of corticosteroids",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Chemotherapy treatment",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "High comorbidity",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Bad compliance of the treatment",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Frequent severe hypoglycaemia",
+        "threshold": null
+      }
+    ],
+    "inclusion_criteria": [
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "INCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Outpatients",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "INCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Age ≥ 65 years old",
+        "threshold": null
+      },
+      {
+        "code": "E11.9",
+        "code_system": "ICD10CM",
+        "kind": "INCLUSION",
+        "mapping_status": "VERIFIED",
+        "operator": null,
+        "raw_text": "Type 2 diabetes mellitus",
+        "threshold": null
+      },
+      {
+        "code": "4548-4",
+        "code_system": "LOINC",
+        "kind": "INCLUSION",
+        "mapping_status": "VERIFIED",
+        "operator": "GTE",
+        "raw_text": "HbA1c ≥9% (74 mmol/mol)",
+        "threshold": 9.0
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "INCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Previously treated with one or two doses of basal insulin and oral hypoglycaemic agents",
+        "threshold": null
+      }
+    ],
+    "nct_id": "NCT04739241",
+    "status": "OK",
+    "title": "Premixed vs Basal Bolus Insulin Therapy in Older Patients With Type 2 Diabetes"
+  }
+}

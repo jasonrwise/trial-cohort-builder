@@ -1,0 +1,11 @@
+{#
+  Scorecard not found panel (08-01-PLAN.md Task 2, tasks.md T005).
+  Context: role, error (str), reason (str). Covers both a malformed ref and
+  an unknown well-formed one -- EXPERIENCE.md "Scorecard not found".
+#}
+<section id="screening-panel">
+  <div class="inline-error" role="alert" data-field="error" data-error="{{ error }}">
+    {{ reason }}
+  </div>
+  <p><a href="/web/scorecards" class="link">Back to Scorecards</a></p>
+</section>

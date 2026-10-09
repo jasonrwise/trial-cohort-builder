@@ -1,0 +1,18 @@
+{#
+  Generic error panel for 403 access-denial and 422 framework-validation
+  failures (06-04-PLAN.md Task 3, AD-20). Context: error (str), reason
+  (str), detail (list of {loc, msg} dicts, or None). All text is escaped
+  (Jinja2 autoescape; never |safe on any of these fields).
+#}
+<section id="screening-panel">
+  <div class="inline-error" role="alert" data-field="error" data-error="{{ error }}">
+    {{ reason }}
+    {% if detail %}
+    <ul class="validation-detail">
+      {% for item in detail %}
+      <li>{{ item.loc }}: {{ item.msg }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</section>

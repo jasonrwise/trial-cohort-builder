@@ -1,0 +1,14 @@
+{#
+  Inline error partial (06-04-PLAN.md Task 1).
+  Context (via a `with` block at the include site, since this is shared across
+  callers with differently-named source fields): `message` (str or None),
+  `retry_href` (str or None), `error_id` (str or None -- becomes the div's
+  id, so a caller can point an input's aria-describedby at it).
+  Renders nothing when `message` is falsy.
+#}
+{% if message %}
+<div class="inline-error" role="alert"{% if error_id %} id="{{ error_id }}"{% endif %}>
+  {{ message }}
+  {% if retry_href %}<a href="{{ retry_href }}" class="link">Retry</a>{% endif %}
+</div>
+{% endif %}

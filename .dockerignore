@@ -1,0 +1,10 @@
+# Deny-all build context: nothing enters an image layer unless it is re-included here.
+*
+!pyproject.toml
+!src
+!scripts/mock_oauth_token_server.py
+!scripts/verify_counts.py
+!demo-data/synthetic
+**/__pycache__
+**/*.pyc
+**/graphify-out

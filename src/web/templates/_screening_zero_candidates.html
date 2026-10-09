@@ -1,0 +1,28 @@
+{#
+  Zero-candidate page (12-05-PLAN.md Task 1, FR-028, PRD FR-17(7), D-04,
+  WEBAPP-09). Shown when the cohort query succeeded and retrieved nobody.
+  Context: role, nct_id, trial_title, inclusion, exclusion (lists of
+  EligibilityCriterion).
+
+  No ref, no actions: nothing is stored for this outcome, so there is no
+  Re-run, Download PDF, finalize control or data-field="ref". Step 2's
+  criteria-only note is not reused; it claims no cohort query ran, which is
+  false here. Everything is autoescaped.
+#}
+<section id="screening-panel">
+  {% with current = 3 %}
+    {% include "_stepper.html" %}
+  {% endwith %}
+
+  {% include "_trial_heading.html" %}
+
+  <div class="inline-note" data-terminal="no-candidates">No candidates matched the verified codes. If the store has not been seeded, run the seeder.</div>
+
+  <details id="criteria" class="criteria-disclosure">
+    <summary class="section-title">Criteria</summary>
+    {% with note = none, degraded_reason = none, error = none, embedded = true,
+            anchor = none %}
+      {% include "_screening_step2.html" %}
+    {% endwith %}
+  </details>
+</section>

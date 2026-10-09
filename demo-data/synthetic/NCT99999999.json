@@ -1,0 +1,11 @@
+{
+  "protocolSection": {
+    "eligibilityModule": {
+      "eligibilityCriteria": "Inclusion Criteria:\n\n* Diagnosis of type 2 diabetes mellitus\n* HbA1c MFr Bld >= 7.5 %\n"
+    },
+    "identificationModule": {
+      "briefTitle": "SYNTHETIC DEMO PROTOCOL: Type 2 diabetes with elevated HbA1c",
+      "nctId": "NCT99999999"
+    }
+  }
+}

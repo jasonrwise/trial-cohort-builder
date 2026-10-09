@@ -1,0 +1,167 @@
+{
+  "captured_at": "2026-10-06T22:10:55+00:00",
+  "content_sha256": "478a2d6d590f051bac09546d49f1bc553a35bb6f30cc56f6467292694973dedd",
+  "snapshot_schema_version": 1,
+  "trial": {
+    "exclusion_criteria": [
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Known or suspected hypersensitivity to randomized treatment or related products",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Previous participation in this study (Participation is defined as signed informed consent);",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Participation (i.e., signed informed consent) in any interventional, clinical study within 90 days before screening (except for COVID-19 study);",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Female who is pregnant, breast-feeding or intends to become pregnant",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Presence of severe gastrointestinal disorders, such as severe gastroparesis;",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Presence of severe renal dysfunction (eGFR <30 ml/min/1.73 m2) or end-stage renal disease on dialysis;",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Presence of severe hepatic dysfunction (AST or ALT level ≥ 200 U/L);",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Patients with a history of pancreatitis;",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Patients receiving systemic corticosteroids",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "EXCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Patients with active cancer within the past six months.",
+        "threshold": null
+      }
+    ],
+    "inclusion_criteria": [
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "INCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Age ≥20 years-old",
+        "threshold": null
+      },
+      {
+        "code": "E11.9",
+        "code_system": "ICD10CM",
+        "kind": "INCLUSION",
+        "mapping_status": "VERIFIED",
+        "operator": null,
+        "raw_text": "T2DM ≥ 180 days",
+        "threshold": null
+      },
+      {
+        "code": "4548-4",
+        "code_system": "LOINC",
+        "kind": "INCLUSION",
+        "mapping_status": "VERIFIED",
+        "operator": "GTE",
+        "raw_text": "HbA1c ≥ 7.0% at screening",
+        "threshold": 7.0
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "INCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Under stable doses of OADs for ≥12 weeks prior to screening",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "INCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Insulin naïve (except short term insulin treatment for a maximum of 14 days before screening and/or prior insulin treatment for gestational diabetes)",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "INCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Not currently using real time continuous or flash glucose monitoring",
+        "threshold": null
+      },
+      {
+        "code": null,
+        "code_system": null,
+        "kind": "INCLUSION",
+        "mapping_status": "UNMAPPED",
+        "operator": null,
+        "raw_text": "Not currently using Mallya",
+        "threshold": null
+      }
+    ],
+    "nct_id": "NCT05591391",
+    "status": "OK",
+    "title": "The Efficacy of Mallya in Type 2 Diabetes Transiting From Oral Antidiabetic Drugs to iGlarLixi"
+  }
+}

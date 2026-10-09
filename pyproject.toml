@@ -1,0 +1,63 @@
+[project]
+name = "trialbridge-mcp"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.141.1",
+    "fastmcp==4.0.3",
+    "fpdf2==2.8.8",
+    "httpx==0.28.1",
+    "jinja2==3.1.6",
+    "pydantic==2.13.5",
+    "python-multipart==0.0.32",
+    "rapidfuzz==3.14.6",
+    "uvicorn==0.53.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+    "pytest-asyncio==1.4.0",
+    "respx==0.23.1",
+    "ruff==0.16.7",
+    "black==26.5.1",
+    "playwright==1.63.0",
+    "pyyaml==6.0.3",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "ui_conformance: renders mockup states and built pages in headless Chromium (opt-in; run with -m ui_conformance)",
+]
+# Opt-in: passing `-m ui_conformance` on the command line overrides this default, because the last -m wins.
+addopts = "-m 'not ui_conformance'"
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["_bmad"]
+
+# FastAPI's own dependency-injection idiom is `param: T = Depends(...)` in a
+# function default — bugbear's B008 (no function calls in defaults) would
+# otherwise flag every dependency in src/web/*.py. Depends()/its FastAPI
+# re-export are immutable factory calls, the exact class of exception this
+# ruff setting exists for (06-03-PLAN.md Task 1, first FastAPI code this
+# repo has).
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.params.Depends"]
+
+[tool.black]
+line-length = 100
+extend-exclude = "/_bmad/"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+[tool.setuptools.package-data]
+"src.web" = ["templates/*.html", "static/*"]
+"src.services" = ["fonts/*"]

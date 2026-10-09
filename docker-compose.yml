@@ -1,0 +1,146 @@
+# Demo stack (spec 007, contracts/compose-stack.md). Deployment packaging only (AD-31).
+# Interpolated variables, and only these: POSTGRES_USER, POSTGRES_PASSWORD, FHIR_CLIENT_ID,
+# FHIR_CLIENT_SECRET, TRIALBRIDGE_API_KEY, TRIALBRIDGE_SESSION_SECRET, ANTHROPIC_API_KEY,
+# ANTHROPIC_MODEL, SESSION_COOKIE_SECURE. Offline guard: tests/unit/test_compose_health_gating.py.
+name: trialbridge
+
+services:
+  db:
+    # 16-alpine moves with every minor release; the digest fixes the exact image (11-REVIEW WR-05).
+    image: postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+    environment:
+      POSTGRES_DB: hapi
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # No ports: the database is never published to the host (FR-25).
+    # During first-time init the image runs a temporary server on the unix socket only.
+    # The probe uses TCP on 127.0.0.1, so it passes only once the real server listens (11-REVIEW WR-01).
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "${POSTGRES_USER}", "-d", "hapi"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  fhir:
+    image: hapiproject/hapi:v8.12.0-1
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/hapi
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      HIBERNATE_DIALECT: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect
+    ports:
+      - "127.0.0.1:8080:8080"
+    # Exec form only: the HAPI image ships no shell, curl or wget (Pitfall 3), so a shell or
+    # CMD-SHELL probe would leave it permanently unhealthy.
+    healthcheck:
+      test: ["CMD", "java", "-cp", "/app", "HealthCheck"]
+      interval: 10s
+      timeout: 10s
+      start_period: 90s
+      retries: 12
+
+  token:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "scripts/mock_oauth_token_server.py"]
+    environment:
+      # Container-internal bind; the only host exposure is the loopback publish below.
+      TOKEN_SERVER_HOST: "0.0.0.0"
+    labels:
+      com.trialbridge.demo-only: "true"
+    ports:
+      - "127.0.0.1:8081:8081"
+    # The mock implements do_POST only, so a GET probe would get 501 (Pitfall 4).
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request as u; r=u.urlopen(u.Request('http://127.0.0.1:8081/token',data=b'',method='POST'),timeout=3); raise SystemExit(0 if r.status==200 else 1)",
+        ]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Exactly one worker (AD-21).
+    command:
+      ["python", "-m", "uvicorn", "src.web.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+    depends_on:
+      fhir:
+        condition: service_healthy
+      token:
+        condition: service_healthy
+    environment:
+      FHIR_BASE_URL: http://fhir:8080/fhir
+      FHIR_TOKEN_URL: http://token:8081/token
+      FHIR_CLIENT_ID: ${FHIR_CLIENT_ID}
+      FHIR_CLIENT_SECRET: ${FHIR_CLIENT_SECRET}
+      TRIALBRIDGE_KEYS_FILE: /run/keys.json
+      TRIALBRIDGE_AUDIT_LOG_PATH: /data/audit.log
+      TRIALBRIDGE_SCORECARD_STORE_PATH: /data/scorecards.jsonl
+      TRIALBRIDGE_API_KEY: ${TRIALBRIDGE_API_KEY}
+      TRIALBRIDGE_SESSION_SECRET: ${TRIALBRIDGE_SESSION_SECRET}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL}
+      # Safe default (AD-35): only the example env file turns Secure off, for plain-HTTP loopback.
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
+    volumes:
+      # Read-only (D-01); `make up` copies keys.example.json when keys.json is absent.
+      - ./keys.json:/run/keys.json:ro
+      # One named volume for the scorecard store and audit log (D-03). The image's /data is
+      # owned by the web user, so a fresh named volume inherits that ownership (Pitfall 6).
+      - webstate:/data
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/web/login', timeout=3)",
+        ]
+      interval: 10s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+
+  # One-shot loader, started only with `--profile seed` (Phase 12 owns the module and
+  # `make load`); the subcommand arrives as run arguments, so there is no command here.
+  seed:
+    profiles: ["seed"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: ["python", "-m", "src.seeder.cli"]
+    depends_on:
+      fhir:
+        condition: service_healthy
+      token:
+        condition: service_healthy
+    environment:
+      FHIR_BASE_URL: http://fhir:8080/fhir
+      FHIR_TOKEN_URL: http://token:8081/token
+      FHIR_CLIENT_ID: ${FHIR_CLIENT_ID}
+      FHIR_CLIENT_SECRET: ${FHIR_CLIENT_SECRET}
+    volumes:
+      # Read-write (D-07): first-run and --refresh criteria snapshots land in the repository;
+      # `make load` runs this service as the host user so they are host-owned.
+      - ./demo-data/criteria:/app/demo-data/criteria
+
+volumes:
+  pgdata:
+  webstate:
